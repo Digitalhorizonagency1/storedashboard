@@ -51,8 +51,26 @@ export default async function handler(req, res) {
     if (req.method === 'DELETE') {
       const { id } = req.query;
       if (!id) return res.status(400).json({ error: 'id manquant' });
+
+      // Recuperer la photo avant suppression, pour pouvoir la nettoyer du Storage juste apres
+      const { data: article } = await supabase
+        .from('articles')
+        .select('photo_url')
+        .eq('id', id)
+        .single();
+
       const { error } = await supabase.from('articles').delete().eq('id', id);
       if (error) throw error;
+
+      if (article && article.photo_url) {
+        const nomFichier = article.photo_url.split('/').pop();
+        if (nomFichier) {
+          // Best-effort : la ligne est deja supprimee, on ne fait pas echouer
+          // toute la requete si le nettoyage du fichier echoue pour une raison quelconque
+          await supabase.storage.from('articles-photos').remove([nomFichier]);
+        }
+      }
+
       return res.status(200).json({ ok: true });
     }
 
