@@ -48,12 +48,23 @@ export default async function handler(req, res) {
       return res.status(200).json({ article: data });
     }
 
+    if (req.method === 'DELETE') {
+      const { id } = req.query;
+      if (!id) return res.status(400).json({ error: 'id manquant' });
+      const { error } = await supabase.from('articles').delete().eq('id', id);
+      if (error) throw error;
+      return res.status(200).json({ ok: true });
+    }
+
     return res.status(405).json({ error: 'Méthode non autorisée' });
   } catch (e) {
     return res.status(500).json({ error: e.message || 'Erreur serveur' });
   }
 }
 
+// Construit le payload envoyé à Supabase à partir du corps de la requête,
+// en recalculant stock_total automatiquement à partir de stock_par_pointure
+// (jamais laissé à la saisie manuelle, pour éviter toute divergence entre les deux).
 function buildPayload(body) {
   const stockParPointure = body.stock_par_pointure || {};
   const stockTotal = Object.values(stockParPointure).reduce(
@@ -62,6 +73,8 @@ function buildPayload(body) {
   );
   const pointuresDispo = Object.keys(stockParPointure).join(',');
 
+  // tags_occasion : uniquement habille/nu_pied pour homme et femme, vide pour enfant
+  // (regle produit decidee — voir contexte du dashboard)
   let tagsOccasion = '';
   if ((body.categorie === 'homme' || body.categorie === 'femme') && body.occasion) {
     tagsOccasion = body.occasion;

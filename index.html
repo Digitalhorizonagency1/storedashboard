@@ -4,25 +4,33 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Souliers Prestige — Catalogue</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@500;600;700&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
 <style>
   :root {
-    --noir: #14110f;
-    --noir-clair: #1e1a17;
+    --noir: #0e0c0a;
+    --noir-clair: #1a1512;
+    --noir-carte: #201a16;
     --or: #c9a15a;
-    --or-clair: #e0c384;
-    --texte: #f4f1ea;
-    --texte-att: #a89f92;
+    --or-clair: #e8ca94;
+    --or-riche: linear-gradient(135deg, #d4af6a 0%, #b8863f 100%);
+    --texte: #f4efe6;
+    --texte-att: #a89880;
     --erreur: #d0654a;
     --succes: #7a9a6a;
-    --bordure: #332e28;
+    --bordure: #3a2f24;
+    --bordure-claire: #4a3d2e;
   }
   * { box-sizing: border-box; margin: 0; padding: 0; }
   body {
-    font-family: -apple-system, "Segoe UI", Roboto, sans-serif;
+    font-family: 'Inter', -apple-system, "Segoe UI", Roboto, sans-serif;
     background: var(--noir);
+    background-image: radial-gradient(ellipse 80% 50% at 50% -10%, rgba(201,161,90,0.06), transparent);
     color: var(--texte);
     min-height: 100vh;
   }
+  h1, h2 { font-family: 'Cormorant Garamond', Georgia, serif; }
 
   #ecran-connexion {
     min-height: 100vh;
@@ -32,16 +40,32 @@
     padding: 24px;
   }
   .carte-connexion {
-    background: var(--noir-clair);
+    background: var(--noir-carte);
     border: 1px solid var(--bordure);
-    border-radius: 12px;
-    padding: 40px 32px;
+    border-radius: 16px;
+    padding: 48px 36px;
     width: 100%;
-    max-width: 360px;
+    max-width: 380px;
     text-align: center;
+    box-shadow: 0 24px 60px rgba(0,0,0,0.5), 0 0 0 1px rgba(201,161,90,0.05) inset;
   }
-  .carte-connexion h1 { font-size: 22px; font-weight: 600; letter-spacing: 0.02em; margin-bottom: 4px; }
-  .carte-connexion p.sous-titre { color: var(--texte-att); font-size: 13px; margin-bottom: 28px; }
+  .carte-connexion h1 {
+    font-size: 30px;
+    font-weight: 600;
+    letter-spacing: 0.01em;
+    margin-bottom: 6px;
+    background: var(--or-riche);
+    -webkit-background-clip: text;
+    background-clip: text;
+    -webkit-text-fill-color: transparent;
+  }
+  .carte-connexion p.sous-titre {
+    color: var(--texte-att);
+    font-size: 12px;
+    text-transform: uppercase;
+    letter-spacing: 0.12em;
+    margin-bottom: 32px;
+  }
   input[type="password"], input[type="text"], input[type="number"], select, textarea {
     width: 100%;
     background: var(--noir);
@@ -51,37 +75,63 @@
     color: var(--texte);
     font-size: 14px;
     font-family: inherit;
+    transition: border-color 0.15s, box-shadow 0.15s;
   }
-  input:focus, select:focus, textarea:focus { outline: none; border-color: var(--or); }
+  input:focus, select:focus, textarea:focus {
+    outline: none;
+    border-color: var(--or);
+    box-shadow: 0 0 0 3px rgba(201,161,90,0.12);
+  }
   .btn {
-    display: inline-flex; align-items: center; justify-content: center; gap: 6px;
-    background: var(--or); color: var(--noir); border: none; border-radius: 8px;
-    padding: 12px 20px; font-size: 14px; font-weight: 600; cursor: pointer; width: 100%; margin-top: 16px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
+    background: var(--or-riche);
+    color: var(--noir);
+    border: none;
+    border-radius: 9px;
+    padding: 13px 20px;
+    font-size: 14px;
+    font-weight: 600;
+    cursor: pointer;
+    width: 100%;
+    margin-top: 18px;
+    box-shadow: 0 4px 14px rgba(201,161,90,0.25);
+    transition: transform 0.12s, box-shadow 0.12s;
   }
-  .btn:hover { background: var(--or-clair); }
-  .btn.secondaire { background: transparent; color: var(--texte); border: 1px solid var(--bordure); }
-  .btn.secondaire:hover { border-color: var(--or); }
+  .btn:hover { transform: translateY(-1px); box-shadow: 0 6px 18px rgba(201,161,90,0.35); }
+  .btn:active { transform: translateY(0); }
+  .btn.secondaire {
+    background: transparent; color: var(--texte); border: 1px solid var(--bordure); box-shadow: none;
+  }
+  .btn.secondaire:hover { border-color: var(--or); transform: none; box-shadow: none; }
+  .btn.danger { background: transparent; color: var(--erreur); border: 1px solid #4a2a24; box-shadow: none; width: auto; margin-top: 0; }
+  .btn.danger:hover { background: rgba(208,101,74,0.1); transform: none; box-shadow: none; }
   .erreur-msg { color: var(--erreur); font-size: 13px; margin-top: 12px; min-height: 18px; }
 
   #dashboard { display: none; }
   header.entete {
     display: flex; justify-content: space-between; align-items: center;
-    padding: 20px 28px; border-bottom: 1px solid var(--bordure);
-    position: sticky; top: 0; background: var(--noir); z-index: 10;
+    padding: 24px 32px; border-bottom: 1px solid var(--bordure);
+    position: sticky; top: 0; background: rgba(14,12,10,0.92); backdrop-filter: blur(8px); z-index: 10;
   }
-  header.entete h1 { font-size: 18px; font-weight: 600; }
+  header.entete h1 { font-size: 26px; font-weight: 600; letter-spacing: 0.01em; }
   header.entete .actions-entete { display: flex; gap: 10px; }
   .btn-petit {
-    background: var(--or); color: var(--noir); border: none; border-radius: 6px;
-    padding: 9px 16px; font-size: 13px; font-weight: 600; cursor: pointer;
+    background: var(--or-riche); color: var(--noir); border: none; border-radius: 8px;
+    padding: 10px 18px; font-size: 13px; font-weight: 600; cursor: pointer;
+    box-shadow: 0 3px 10px rgba(201,161,90,0.2); transition: transform 0.12s;
   }
-  .btn-petit.secondaire { background: transparent; color: var(--texte-att); border: 1px solid var(--bordure); }
+  .btn-petit:hover { transform: translateY(-1px); }
+  .btn-petit.secondaire { background: transparent; color: var(--texte-att); border: 1px solid var(--bordure); box-shadow: none; }
+  .btn-petit.secondaire:hover { border-color: var(--or); color: var(--texte); transform: none; }
 
-  main { padding: 24px 28px 80px; max-width: 1100px; margin: 0 auto; }
+  main { padding: 28px 32px 80px; max-width: 1100px; margin: 0 auto; }
 
   /* ---------- Onglets ---------- */
   .onglets {
-    display: flex; gap: 4px; padding: 0 28px;
+    display: flex; gap: 4px; padding: 0 32px;
     border-bottom: 1px solid var(--bordure);
     max-width: 1100px; margin: 0 auto;
   }
@@ -96,28 +146,32 @@
   .barre-vue { display: flex; justify-content: flex-end; align-items: center; margin-top: 4px; }
 
   /* ---------- Vue commandes ---------- */
-  .cartes-resume { display: grid; grid-template-columns: repeat(auto-fit, minmax(160px, 1fr)); gap: 12px; margin: 20px 0; }
+  .cartes-resume { display: grid; grid-template-columns: repeat(auto-fit, minmax(160px, 1fr)); gap: 14px; margin: 24px 0; }
   .carte-resume {
-    background: var(--noir-clair); border: 1px solid var(--bordure); border-radius: 10px; padding: 16px;
+    background: var(--noir-carte); border: 1px solid var(--bordure); border-radius: 12px; padding: 18px 20px;
+    box-shadow: 0 6px 18px rgba(0,0,0,0.25);
   }
-  .carte-resume .valeur { font-size: 22px; font-weight: 700; color: var(--or); }
-  .carte-resume .label { font-size: 12px; color: var(--texte-att); margin-top: 4px; }
+  .carte-resume .valeur { font-family: 'Cormorant Garamond', serif; font-size: 30px; font-weight: 600; color: var(--or-clair); line-height: 1.1; }
+  .carte-resume .label { font-size: 11px; color: var(--texte-att); margin-top: 6px; text-transform: uppercase; letter-spacing: 0.06em; }
 
   .ligne-commande {
-    background: var(--noir-clair); border: 1px solid var(--bordure); border-radius: 10px;
-    padding: 14px 16px; margin-bottom: 10px; display: grid;
-    grid-template-columns: 48px 1fr auto; gap: 14px; align-items: center;
+    background: var(--noir-carte); border: 1px solid var(--bordure); border-radius: 12px;
+    padding: 16px 18px; margin-bottom: 12px; display: grid;
+    grid-template-columns: 52px 1fr auto; gap: 16px; align-items: center;
+    box-shadow: 0 4px 14px rgba(0,0,0,0.2); transition: border-color 0.15s;
   }
+  .ligne-commande:hover { border-color: var(--bordure-claire); }
   .ligne-commande .miniature {
-    width: 48px; height: 48px; border-radius: 8px; background: #0c0a08 center/cover no-repeat;
+    width: 52px; height: 52px; border-radius: 9px; background: #0c0a08 center/cover no-repeat;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.3);
   }
   .ligne-commande .details .nom-article { font-weight: 600; font-size: 14px; }
-  .ligne-commande .details .sous-info { font-size: 12px; color: var(--texte-att); margin-top: 2px; }
-  .ligne-commande .droite { text-align: right; display: flex; flex-direction: column; align-items: flex-end; gap: 6px; }
-  .ligne-commande .prix { font-weight: 700; font-size: 15px; }
+  .ligne-commande .details .sous-info { font-size: 12px; color: var(--texte-att); margin-top: 3px; }
+  .ligne-commande .droite { text-align: right; display: flex; flex-direction: column; align-items: flex-end; gap: 7px; }
+  .ligne-commande .prix { font-family: 'Cormorant Garamond', serif; font-weight: 700; font-size: 19px; color: var(--or-clair); }
   select.select-statut {
     background: var(--noir); border: 1px solid var(--bordure); color: var(--texte);
-    border-radius: 6px; padding: 6px 10px; font-size: 12px; cursor: pointer;
+    border-radius: 7px; padding: 7px 10px; font-size: 12px; cursor: pointer;
   }
   .badge-statut {
     display: inline-block; font-size: 10px; padding: 3px 8px; border-radius: 10px;
@@ -134,56 +188,64 @@
     .ligne-commande .droite { grid-column: 1 / -1; flex-direction: row; justify-content: space-between; align-items: center; margin-top: 8px; }
   }
 
-  .grille-articles { display: grid; grid-template-columns: repeat(auto-fill, minmax(220px, 1fr)); gap: 16px; margin-top: 20px; }
+  .grille-articles { display: grid; grid-template-columns: repeat(auto-fill, minmax(220px, 1fr)); gap: 18px; margin-top: 24px; }
   .carte-article {
-    background: var(--noir-clair); border: 1px solid var(--bordure); border-radius: 10px;
-    overflow: hidden; cursor: pointer; transition: border-color 0.15s;
+    background: var(--noir-carte); border: 1px solid var(--bordure); border-radius: 14px;
+    overflow: hidden; cursor: pointer; transition: transform 0.15s, border-color 0.15s, box-shadow 0.15s;
+    box-shadow: 0 6px 18px rgba(0,0,0,0.25);
   }
-  .carte-article:hover { border-color: var(--or); }
+  .carte-article:hover { border-color: var(--bordure-claire); transform: translateY(-3px); box-shadow: 0 12px 28px rgba(0,0,0,0.35); }
   .carte-article .photo {
-    width: 100%; height: 150px; background: #0c0a08 center/cover no-repeat;
+    width: 100%; height: 160px; background: #0c0a08 center/cover no-repeat;
     display: flex; align-items: center; justify-content: center; color: var(--texte-att); font-size: 12px;
+    transition: transform 0.25s;
   }
-  .carte-article .infos { padding: 12px 14px; }
-  .carte-article .nom { font-size: 14px; font-weight: 600; margin-bottom: 4px; }
+  .carte-article:hover .photo { transform: scale(1.04); }
+  .carte-article .infos { padding: 14px 16px; }
+  .carte-article .nom { font-size: 14.5px; font-weight: 600; margin-bottom: 5px; }
   .carte-article .meta { font-size: 12px; color: var(--texte-att); display: flex; justify-content: space-between; }
   .badge-inactif { display: inline-block; background: var(--erreur); color: white; font-size: 10px; padding: 2px 7px; border-radius: 10px; margin-left: 6px; }
 
   .etat-vide { text-align: center; padding: 60px 20px; color: var(--texte-att); }
 
   #panneau-overlay { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.6); z-index: 100; overflow-y: auto; padding: 24px; }
-  #panneau-formulaire { background: var(--noir-clair); border: 1px solid var(--bordure); border-radius: 12px; max-width: 560px; margin: 0 auto; padding: 28px; }
-  #panneau-formulaire h2 { font-size: 18px; margin-bottom: 20px; }
-  .champ { margin-bottom: 16px; }
-  .champ label { display: block; font-size: 12px; color: var(--texte-att); margin-bottom: 6px; text-transform: uppercase; letter-spacing: 0.03em; }
+  #panneau-formulaire { background: var(--noir-carte); border: 1px solid var(--bordure); border-radius: 16px; max-width: 560px; margin: 0 auto; padding: 32px; box-shadow: 0 24px 60px rgba(0,0,0,0.5); }
+  #panneau-formulaire h2 { font-size: 24px; margin-bottom: 24px; }
+  .champ { margin-bottom: 18px; }
+  .champ label { display: block; font-size: 11px; color: var(--texte-att); margin-bottom: 7px; text-transform: uppercase; letter-spacing: 0.06em; }
   .ligne-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
 
-  .zone-photo { border: 2px dashed var(--bordure); border-radius: 10px; padding: 20px; text-align: center; cursor: pointer; transition: border-color 0.15s; position: relative; }
-  .zone-photo.survol { border-color: var(--or); background: rgba(201,161,90,0.05); }
-  .zone-photo img { max-width: 100%; max-height: 160px; border-radius: 8px; margin-bottom: 8px; }
+  .zone-photo { border: 2px dashed var(--bordure); border-radius: 12px; padding: 22px; text-align: center; cursor: pointer; transition: border-color 0.15s, background 0.15s; position: relative; }
+  .zone-photo:hover { border-color: var(--bordure-claire); }
+  .zone-photo.survol { border-color: var(--or); background: rgba(201,161,90,0.06); }
+  .zone-photo img { max-width: 100%; max-height: 160px; border-radius: 10px; margin-bottom: 8px; box-shadow: 0 6px 16px rgba(0,0,0,0.3); }
   .zone-photo .instruction { font-size: 13px; color: var(--texte-att); }
   .zone-photo input[type="file"] { display: none; }
 
   .liste-pointures { display: flex; flex-direction: column; gap: 8px; }
   .ligne-pointure { display: grid; grid-template-columns: 1fr 1fr auto; gap: 8px; align-items: center; }
-  .ligne-pointure button.retirer { background: transparent; border: 1px solid var(--bordure); color: var(--erreur); border-radius: 6px; width: 36px; height: 36px; cursor: pointer; font-size: 16px; }
-  .btn-ajouter-pointure { background: transparent; border: 1px dashed var(--bordure); color: var(--or); border-radius: 8px; padding: 10px; font-size: 13px; cursor: pointer; margin-top: 4px; }
+  .ligne-pointure button.retirer { background: transparent; border: 1px solid var(--bordure); color: var(--erreur); border-radius: 7px; width: 38px; height: 38px; cursor: pointer; font-size: 16px; }
+  .btn-ajouter-pointure { background: transparent; border: 1px dashed var(--bordure); color: var(--or); border-radius: 8px; padding: 11px; font-size: 13px; cursor: pointer; margin-top: 4px; transition: border-color 0.15s; }
+  .btn-ajouter-pointure:hover { border-color: var(--or); }
 
   .toggle-ligne { display: flex; align-items: center; justify-content: space-between; padding: 8px 0; }
-  .switch { position: relative; width: 44px; height: 24px; }
+  .switch { position: relative; width: 46px; height: 26px; }
   .switch input { opacity: 0; width: 0; height: 0; }
-  .slider { position: absolute; cursor: pointer; inset: 0; background: var(--bordure); border-radius: 24px; transition: 0.2s; }
-  .slider:before { content: ""; position: absolute; height: 18px; width: 18px; left: 3px; bottom: 3px; background: var(--texte); border-radius: 50%; transition: 0.2s; }
-  input:checked + .slider { background: var(--or); }
+  .slider { position: absolute; cursor: pointer; inset: 0; background: var(--bordure); border-radius: 26px; transition: 0.2s; }
+  .slider:before { content: ""; position: absolute; height: 20px; width: 20px; left: 3px; bottom: 3px; background: var(--texte); border-radius: 50%; transition: 0.2s; }
+  input:checked + .slider { background: var(--or-riche); }
   input:checked + .slider:before { transform: translateX(20px); background: var(--noir); }
 
-  .actions-formulaire { display: flex; gap: 10px; margin-top: 24px; }
+  .actions-formulaire { display: flex; gap: 10px; margin-top: 28px; justify-content: space-between; }
   .actions-formulaire .btn { margin-top: 0; }
+  .actions-formulaire .groupe-droite { display: flex; gap: 10px; margin-left: auto; }
+  .actions-formulaire .groupe-droite .btn { width: auto; }
 
   .toast {
     position: fixed; bottom: 24px; left: 50%; transform: translateX(-50%);
-    background: var(--noir-clair); border: 1px solid var(--or); color: var(--texte);
-    padding: 12px 20px; border-radius: 8px; font-size: 13px; z-index: 200; display: none;
+    background: var(--noir-carte); border: 1px solid var(--or); color: var(--texte);
+    padding: 13px 22px; border-radius: 10px; font-size: 13px; z-index: 200; display: none;
+    box-shadow: 0 12px 30px rgba(0,0,0,0.4);
   }
   .toast.erreur { border-color: var(--erreur); }
 
@@ -324,8 +386,11 @@
       </div>
 
       <div class="actions-formulaire">
-        <button type="button" class="btn secondaire" id="btn-annuler-formulaire">Annuler</button>
-        <button type="submit" class="btn" id="btn-enregistrer">Enregistrer</button>
+        <button type="button" class="btn danger" id="btn-supprimer-article" style="display:none;">Supprimer</button>
+        <div class="groupe-droite">
+          <button type="button" class="btn secondaire" id="btn-annuler-formulaire">Annuler</button>
+          <button type="submit" class="btn" id="btn-enregistrer">Enregistrer</button>
+        </div>
       </div>
     </form>
   </div>
@@ -574,10 +639,34 @@ function ouvrirFormulaire(article) {
   else { for (const [pointure, stock] of entrees) { ajouterLignePointure(pointure, stock); } }
 
   mettreAJourVisibiliteOccasion();
+  document.getElementById('btn-supprimer-article').style.display = article ? 'inline-flex' : 'none';
   document.getElementById('panneau-overlay').style.display = 'block';
 }
 
 function fermerFormulaire() { document.getElementById('panneau-overlay').style.display = 'none'; }
+
+document.getElementById('btn-supprimer-article').addEventListener('click', async () => {
+  if (!articleEnEdition) return;
+  const confirme = confirm('Supprimer définitivement cet article ? Cette action est irréversible.');
+  if (!confirme) return;
+
+  const res = await fetch(`${API}/articles?id=${articleEnEdition}`, {
+    method: 'DELETE',
+    headers: { 'x-dashboard-password': motDePasse }
+  });
+
+  if (res.ok) {
+    afficherToast('Article supprimé');
+    fermerFormulaire();
+    await chargerArticles();
+  } else {
+    const err = await res.json();
+    const msg = (err.error || '').includes('foreign key')
+      ? 'Impossible de supprimer : cet article est lié à une ou plusieurs commandes existantes. Désactivez-le plutôt que de le supprimer.'
+      : (err.error || 'Échec de la suppression');
+    afficherToast(msg, true);
+  }
+});
 
 document.getElementById('champ-categorie').addEventListener('change', mettreAJourVisibiliteOccasion);
 function mettreAJourVisibiliteOccasion() {
