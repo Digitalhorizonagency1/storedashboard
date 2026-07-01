@@ -191,19 +191,42 @@
   .grille-articles { display: grid; grid-template-columns: repeat(auto-fill, minmax(220px, 1fr)); gap: 18px; margin-top: 24px; }
   .carte-article {
     background: var(--noir-carte); border: 1px solid var(--bordure); border-radius: 14px;
-    overflow: hidden; cursor: pointer; transition: transform 0.15s, border-color 0.15s, box-shadow 0.15s;
+    overflow: hidden; cursor: pointer; transition: transform 0.28s ease, opacity 0.28s ease, border-color 0.15s, box-shadow 0.15s;
     box-shadow: 0 6px 18px rgba(0,0,0,0.25);
   }
   .carte-article:hover { border-color: var(--bordure-claire); transform: translateY(-3px); box-shadow: 0 12px 28px rgba(0,0,0,0.35); }
+  .carte-article.suppression-en-cours { transform: scale(0.82); opacity: 0; pointer-events: none; }
   .carte-article .photo {
-    width: 100%; height: 160px; background: #0c0a08 center/cover no-repeat;
+    width: 100%; height: 160px; background: #0c0a08 center/cover no-repeat; position: relative;
     display: flex; align-items: center; justify-content: center; color: var(--texte-att); font-size: 12px;
     transition: transform 0.25s;
   }
   .carte-article:hover .photo { transform: scale(1.04); }
+  .btn-suppr-tuile {
+    position: absolute; top: 8px; right: 8px; width: 30px; height: 30px;
+    background: rgba(14,12,10,0.72); border: 1px solid rgba(255,255,255,0.08); border-radius: 8px;
+    color: #f4efe6; font-size: 13px; cursor: pointer; display: flex; align-items: center; justify-content: center;
+    opacity: 0.85; transition: opacity 0.15s, background 0.15s;
+    z-index: 2;
+  }
+  .btn-suppr-tuile:hover { opacity: 1; background: rgba(208,101,74,0.85); }
   .carte-article .infos { padding: 14px 16px; }
-  .carte-article .nom { font-size: 14.5px; font-weight: 600; margin-bottom: 5px; }
-  .carte-article .meta { font-size: 12px; color: var(--texte-att); display: flex; justify-content: space-between; }
+  .carte-article .nom { font-size: 14.5px; font-weight: 600; margin-bottom: 3px; }
+  .carte-article .sous-titre-tuile { font-size: 11.5px; color: var(--or-clair); text-transform: uppercase; letter-spacing: 0.04em; margin-bottom: 6px; }
+  .carte-article .description-courte {
+    font-size: 12px; color: var(--texte-att); line-height: 1.4; margin-bottom: 8px;
+    display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden;
+  }
+  .chips { display: flex; flex-wrap: wrap; gap: 5px; margin-bottom: 10px; }
+  .chip {
+    font-size: 10.5px; padding: 3px 8px; border-radius: 8px; background: var(--noir);
+    border: 1px solid var(--bordure); color: var(--texte-att);
+  }
+  .chip.chip-or { border-color: rgba(201,161,90,0.4); color: var(--or-clair); }
+  .carte-article .meta { font-size: 12px; color: var(--texte-att); display: flex; justify-content: space-between; align-items: center; }
+  .prix-tuile { font-family: 'Cormorant Garamond', serif; font-weight: 700; font-size: 17px; color: var(--or-clair); }
+  .stock-tuile { font-size: 11px; color: var(--succes); }
+  .stock-tuile.rupture { color: var(--erreur); }
   .badge-inactif { display: inline-block; background: var(--erreur); color: white; font-size: 10px; padding: 2px 7px; border-radius: 10px; margin-left: 6px; }
 
   .etat-vide { text-align: center; padding: 60px 20px; color: var(--texte-att); }
@@ -251,7 +274,44 @@
 
   @media (max-width: 480px) {
     .ligne-2 { grid-template-columns: 1fr; }
-    main { padding: 16px; }
+    main { padding: 16px 16px 60px; }
+
+    .carte-connexion { padding: 36px 24px; }
+    .carte-connexion h1 { font-size: 26px; }
+
+    header.entete { padding: 16px 18px; flex-wrap: wrap; gap: 10px; }
+    header.entete h1 { font-size: 19px; }
+    .btn-petit { padding: 9px 14px; font-size: 12.5px; }
+
+    .onglets { padding: 0 18px; overflow-x: auto; }
+    .onglet { padding: 10px 12px; font-size: 13px; white-space: nowrap; }
+
+    .grille-articles { grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); gap: 12px; margin-top: 18px; }
+    .carte-article .photo { height: 120px; }
+    .carte-article .infos { padding: 11px 12px; }
+    .carte-article .nom { font-size: 13px; }
+    .carte-article .description-courte { display: none; }
+
+    .cartes-resume { grid-template-columns: repeat(2, 1fr); gap: 10px; margin: 18px 0; }
+    .carte-resume { padding: 14px 16px; }
+    .carte-resume .valeur { font-size: 24px; }
+
+    .ligne-commande { padding: 12px 14px; gap: 12px; }
+
+    #panneau-overlay { padding: 0; }
+    #panneau-formulaire { border-radius: 0; max-width: 100%; min-height: 100vh; padding: 24px 18px 40px; }
+
+    .actions-formulaire { flex-direction: column-reverse; align-items: stretch; gap: 12px; }
+    .actions-formulaire .groupe-droite { margin-left: 0; width: 100%; }
+    .actions-formulaire .groupe-droite .btn { flex: 1; }
+    #btn-supprimer-article { width: 100%; }
+
+    .toast { left: 16px; right: 16px; transform: none; text-align: center; bottom: 16px; }
+  }
+
+  @media (max-width: 340px) {
+    .cartes-resume { grid-template-columns: 1fr; }
+    .grille-articles { grid-template-columns: repeat(auto-fill, minmax(130px, 1fr)); }
   }
 </style>
 </head>
@@ -579,17 +639,80 @@ function afficherGrille(articles) {
   for (const a of articles) {
     const carte = document.createElement('div');
     carte.className = 'carte-article';
+    carte.dataset.id = a.id;
+
+    const rupture = (a.stock_total || 0) <= 0;
+    const chips = [
+      a.categorie ? `<span class="chip">${escapeHtml(capitaliser(a.categorie))}</span>` : '',
+      a.tags_occasion ? `<span class="chip chip-or">${escapeHtml(capitaliser(a.tags_occasion))}</span>` : '',
+      a.couleur ? `<span class="chip">${escapeHtml(a.couleur)}</span>` : ''
+    ].filter(Boolean).join('');
+
     carte.innerHTML = `
       <div class="photo" style="${a.photo_url ? `background-image:url('${a.photo_url}')` : ''}">
         ${a.photo_url ? '' : 'Pas de photo'}
+        <button type="button" class="btn-suppr-tuile" title="Supprimer cet article">🗑</button>
       </div>
       <div class="infos">
         <div class="nom">${escapeHtml(a.nom)}${a.actif ? '' : '<span class="badge-inactif">inactif</span>'}</div>
-        <div class="meta"><span>${escapeHtml(a.type || '')}</span><span>${formatPrix(a.prix)} CFA</span></div>
+        <div class="sous-titre-tuile">${escapeHtml(capitaliser(a.type || ''))}</div>
+        ${a.description ? `<div class="description-courte">${escapeHtml(a.description)}</div>` : ''}
+        ${chips ? `<div class="chips">${chips}</div>` : ''}
+        <div class="meta">
+          <span class="prix-tuile">${formatPrix(a.prix)} CFA</span>
+          <span class="stock-tuile ${rupture ? 'rupture' : ''}">${rupture ? 'Rupture' : (a.stock_total || 0) + ' en stock'}</span>
+        </div>
       </div>
     `;
+
     carte.addEventListener('click', () => ouvrirFormulaire(a));
+
+    const btnSuppr = carte.querySelector('.btn-suppr-tuile');
+    btnSuppr.addEventListener('click', (e) => {
+      e.stopPropagation();
+      supprimerDepuisTuile(a.id, carte);
+    });
+
     grille.appendChild(carte);
+  }
+}
+
+function capitaliser(s) {
+  if (!s) return '';
+  return s.charAt(0).toUpperCase() + s.slice(1);
+}
+
+async function supprimerDepuisTuile(id, carte) {
+  const confirme = confirm('Supprimer définitivement cet article ?');
+  if (!confirme) return;
+
+  carte.classList.add('suppression-en-cours');
+
+  try {
+    const res = await fetch(`${API}/articles?id=${id}`, {
+      method: 'DELETE',
+      headers: { 'x-dashboard-password': motDePasse }
+    });
+
+    if (!res.ok) {
+      const err = await res.json();
+      throw new Error(
+        (err.error || '').includes('foreign key')
+          ? 'Impossible de supprimer : article lié à une commande. Désactivez-le plutôt.'
+          : (err.error || 'Échec de la suppression')
+      );
+    }
+
+    setTimeout(() => {
+      carte.remove();
+      if (document.querySelectorAll('.carte-article').length === 0) {
+        document.getElementById('etat-vide').style.display = 'block';
+      }
+    }, 280);
+    afficherToast('Article supprimé');
+  } catch (err) {
+    carte.classList.remove('suppression-en-cours');
+    afficherToast(err.message, true);
   }
 }
 
