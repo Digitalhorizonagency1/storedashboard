@@ -1,0 +1,546 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Souliers Prestige — Catalogue</title>
+<style>
+  :root {
+    --noir: #14110f;
+    --noir-clair: #1e1a17;
+    --or: #c9a15a;
+    --or-clair: #e0c384;
+    --texte: #f4f1ea;
+    --texte-att: #a89f92;
+    --erreur: #d0654a;
+    --succes: #7a9a6a;
+    --bordure: #332e28;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    font-family: -apple-system, "Segoe UI", Roboto, sans-serif;
+    background: var(--noir);
+    color: var(--texte);
+    min-height: 100vh;
+  }
+
+  #ecran-connexion {
+    min-height: 100vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 24px;
+  }
+  .carte-connexion {
+    background: var(--noir-clair);
+    border: 1px solid var(--bordure);
+    border-radius: 12px;
+    padding: 40px 32px;
+    width: 100%;
+    max-width: 360px;
+    text-align: center;
+  }
+  .carte-connexion h1 { font-size: 22px; font-weight: 600; letter-spacing: 0.02em; margin-bottom: 4px; }
+  .carte-connexion p.sous-titre { color: var(--texte-att); font-size: 13px; margin-bottom: 28px; }
+  input[type="password"], input[type="text"], input[type="number"], select, textarea {
+    width: 100%;
+    background: var(--noir);
+    border: 1px solid var(--bordure);
+    border-radius: 8px;
+    padding: 12px 14px;
+    color: var(--texte);
+    font-size: 14px;
+    font-family: inherit;
+  }
+  input:focus, select:focus, textarea:focus { outline: none; border-color: var(--or); }
+  .btn {
+    display: inline-flex; align-items: center; justify-content: center; gap: 6px;
+    background: var(--or); color: var(--noir); border: none; border-radius: 8px;
+    padding: 12px 20px; font-size: 14px; font-weight: 600; cursor: pointer; width: 100%; margin-top: 16px;
+  }
+  .btn:hover { background: var(--or-clair); }
+  .btn.secondaire { background: transparent; color: var(--texte); border: 1px solid var(--bordure); }
+  .btn.secondaire:hover { border-color: var(--or); }
+  .erreur-msg { color: var(--erreur); font-size: 13px; margin-top: 12px; min-height: 18px; }
+
+  #dashboard { display: none; }
+  header.entete {
+    display: flex; justify-content: space-between; align-items: center;
+    padding: 20px 28px; border-bottom: 1px solid var(--bordure);
+    position: sticky; top: 0; background: var(--noir); z-index: 10;
+  }
+  header.entete h1 { font-size: 18px; font-weight: 600; }
+  header.entete .actions-entete { display: flex; gap: 10px; }
+  .btn-petit {
+    background: var(--or); color: var(--noir); border: none; border-radius: 6px;
+    padding: 9px 16px; font-size: 13px; font-weight: 600; cursor: pointer;
+  }
+  .btn-petit.secondaire { background: transparent; color: var(--texte-att); border: 1px solid var(--bordure); }
+
+  main { padding: 24px 28px 80px; max-width: 1100px; margin: 0 auto; }
+
+  .grille-articles { display: grid; grid-template-columns: repeat(auto-fill, minmax(220px, 1fr)); gap: 16px; margin-top: 20px; }
+  .carte-article {
+    background: var(--noir-clair); border: 1px solid var(--bordure); border-radius: 10px;
+    overflow: hidden; cursor: pointer; transition: border-color 0.15s;
+  }
+  .carte-article:hover { border-color: var(--or); }
+  .carte-article .photo {
+    width: 100%; height: 150px; background: #0c0a08 center/cover no-repeat;
+    display: flex; align-items: center; justify-content: center; color: var(--texte-att); font-size: 12px;
+  }
+  .carte-article .infos { padding: 12px 14px; }
+  .carte-article .nom { font-size: 14px; font-weight: 600; margin-bottom: 4px; }
+  .carte-article .meta { font-size: 12px; color: var(--texte-att); display: flex; justify-content: space-between; }
+  .badge-inactif { display: inline-block; background: var(--erreur); color: white; font-size: 10px; padding: 2px 7px; border-radius: 10px; margin-left: 6px; }
+
+  .etat-vide { text-align: center; padding: 60px 20px; color: var(--texte-att); }
+
+  #panneau-overlay { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.6); z-index: 100; overflow-y: auto; padding: 24px; }
+  #panneau-formulaire { background: var(--noir-clair); border: 1px solid var(--bordure); border-radius: 12px; max-width: 560px; margin: 0 auto; padding: 28px; }
+  #panneau-formulaire h2 { font-size: 18px; margin-bottom: 20px; }
+  .champ { margin-bottom: 16px; }
+  .champ label { display: block; font-size: 12px; color: var(--texte-att); margin-bottom: 6px; text-transform: uppercase; letter-spacing: 0.03em; }
+  .ligne-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+
+  .zone-photo { border: 2px dashed var(--bordure); border-radius: 10px; padding: 20px; text-align: center; cursor: pointer; transition: border-color 0.15s; position: relative; }
+  .zone-photo.survol { border-color: var(--or); background: rgba(201,161,90,0.05); }
+  .zone-photo img { max-width: 100%; max-height: 160px; border-radius: 8px; margin-bottom: 8px; }
+  .zone-photo .instruction { font-size: 13px; color: var(--texte-att); }
+  .zone-photo input[type="file"] { display: none; }
+
+  .liste-pointures { display: flex; flex-direction: column; gap: 8px; }
+  .ligne-pointure { display: grid; grid-template-columns: 1fr 1fr auto; gap: 8px; align-items: center; }
+  .ligne-pointure button.retirer { background: transparent; border: 1px solid var(--bordure); color: var(--erreur); border-radius: 6px; width: 36px; height: 36px; cursor: pointer; font-size: 16px; }
+  .btn-ajouter-pointure { background: transparent; border: 1px dashed var(--bordure); color: var(--or); border-radius: 8px; padding: 10px; font-size: 13px; cursor: pointer; margin-top: 4px; }
+
+  .toggle-ligne { display: flex; align-items: center; justify-content: space-between; padding: 8px 0; }
+  .switch { position: relative; width: 44px; height: 24px; }
+  .switch input { opacity: 0; width: 0; height: 0; }
+  .slider { position: absolute; cursor: pointer; inset: 0; background: var(--bordure); border-radius: 24px; transition: 0.2s; }
+  .slider:before { content: ""; position: absolute; height: 18px; width: 18px; left: 3px; bottom: 3px; background: var(--texte); border-radius: 50%; transition: 0.2s; }
+  input:checked + .slider { background: var(--or); }
+  input:checked + .slider:before { transform: translateX(20px); background: var(--noir); }
+
+  .actions-formulaire { display: flex; gap: 10px; margin-top: 24px; }
+  .actions-formulaire .btn { margin-top: 0; }
+
+  .toast {
+    position: fixed; bottom: 24px; left: 50%; transform: translateX(-50%);
+    background: var(--noir-clair); border: 1px solid var(--or); color: var(--texte);
+    padding: 12px 20px; border-radius: 8px; font-size: 13px; z-index: 200; display: none;
+  }
+  .toast.erreur { border-color: var(--erreur); }
+
+  @media (max-width: 480px) {
+    .ligne-2 { grid-template-columns: 1fr; }
+    main { padding: 16px; }
+  }
+</style>
+</head>
+<body>
+
+<div id="ecran-connexion">
+  <div class="carte-connexion">
+    <h1 id="titre-boutique-connexion">Catalogue</h1>
+    <p class="sous-titre">Gestion du catalogue</p>
+    <input type="password" id="champ-mot-de-passe" placeholder="Mot de passe" autocomplete="current-password">
+    <button class="btn" id="btn-connexion">Se connecter</button>
+    <p class="erreur-msg" id="erreur-connexion"></p>
+  </div>
+</div>
+
+<div id="dashboard">
+  <header class="entete">
+    <h1 id="titre-boutique-entete">Catalogue</h1>
+    <div class="actions-entete">
+      <button class="btn-petit" id="btn-nouvel-article">+ Ajouter un article</button>
+      <button class="btn-petit secondaire" id="btn-deconnexion">Déconnexion</button>
+    </div>
+  </header>
+  <main>
+    <div id="grille-articles" class="grille-articles"></div>
+    <div id="etat-vide" class="etat-vide" style="display:none;">
+      Aucun article pour l'instant. Cliquez sur "Ajouter un article" pour commencer.
+    </div>
+  </main>
+</div>
+
+<div id="panneau-overlay">
+  <div id="panneau-formulaire">
+    <h2 id="titre-formulaire">Nouvel article</h2>
+    <form id="form-article">
+      <div class="champ">
+        <label>Photo</label>
+        <div class="zone-photo" id="zone-photo">
+          <div id="apercu-photo"></div>
+          <div class="instruction" id="instruction-photo">Glissez une photo ici, ou cliquez pour en choisir une</div>
+          <input type="file" id="champ-photo" accept="image/*">
+        </div>
+      </div>
+
+      <div class="champ">
+        <label>Nom de l'article</label>
+        <input type="text" id="champ-nom" required placeholder="Ex: Escarpin Glamour">
+      </div>
+
+      <div class="ligne-2">
+        <div class="champ">
+          <label>Catégorie</label>
+          <select id="champ-categorie">
+            <option value="homme">Homme</option>
+            <option value="femme">Femme</option>
+            <option value="enfant">Enfant</option>
+          </select>
+        </div>
+        <div class="champ">
+          <label>Type</label>
+          <input type="text" id="champ-type" list="liste-types" placeholder="Ex: sandales" required>
+          <datalist id="liste-types">
+            <option value="mocassins">
+            <option value="sandales">
+            <option value="escarpins">
+            <option value="boots">
+            <option value="sneakers">
+            <option value="derby">
+          </datalist>
+        </div>
+      </div>
+
+      <div class="champ" id="champ-occasion-conteneur">
+        <label>Style (homme / femme uniquement)</label>
+        <select id="champ-occasion">
+          <option value="">Aucun</option>
+          <option value="habillé">Habillé</option>
+          <option value="nu pied">Nu pied</option>
+        </select>
+      </div>
+
+      <div class="ligne-2">
+        <div class="champ">
+          <label>Couleur</label>
+          <input type="text" id="champ-couleur" placeholder="Ex: Doré">
+        </div>
+        <div class="champ">
+          <label>Prix (CFA)</label>
+          <input type="number" id="champ-prix" required min="0" placeholder="Ex: 25000">
+        </div>
+      </div>
+
+      <div class="champ">
+        <label>Qualité / gamme (optionnel — pour suggestion d'upgrade)</label>
+        <input type="text" id="champ-qualite" placeholder="Ex: premium">
+      </div>
+
+      <div class="champ">
+        <label>Description</label>
+        <textarea id="champ-description" rows="3" placeholder="Matière, finition, détails..."></textarea>
+      </div>
+
+      <div class="champ">
+        <label>Pointures et stock</label>
+        <div class="liste-pointures" id="liste-pointures"></div>
+        <button type="button" class="btn-ajouter-pointure" id="btn-ajouter-pointure">+ Ajouter une pointure</button>
+      </div>
+
+      <div class="champ toggle-ligne">
+        <label style="margin:0;">Article actif (visible pour les clients)</label>
+        <label class="switch">
+          <input type="checkbox" id="champ-actif" checked>
+          <span class="slider"></span>
+        </label>
+      </div>
+
+      <div class="actions-formulaire">
+        <button type="button" class="btn secondaire" id="btn-annuler-formulaire">Annuler</button>
+        <button type="submit" class="btn" id="btn-enregistrer">Enregistrer</button>
+      </div>
+    </form>
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+const API = '/api';
+let motDePasse = sessionStorage.getItem('sp_dashboard_pwd') || '';
+let articleEnEdition = null;
+let photoBase64 = null;
+let photoFilename = null;
+let photoMimeType = null;
+let photoUrlExistante = null;
+
+(async function chargerNomBoutique() {
+  try {
+    const res = await fetch(`${API}/config`);
+    const { shopName } = await res.json();
+    document.getElementById('titre-boutique-connexion').textContent = shopName;
+    document.getElementById('titre-boutique-entete').textContent = `Catalogue — ${shopName}`;
+    document.title = `${shopName} — Catalogue`;
+  } catch (e) { /* le titre generique par defaut reste affiche si ca echoue */ }
+})();
+
+async function tenterConnexion(pwd) {
+  const res = await fetch(`${API}/login`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ password: pwd })
+  });
+  return res.ok;
+}
+
+document.getElementById('btn-connexion').addEventListener('click', async () => {
+  const pwd = document.getElementById('champ-mot-de-passe').value;
+  const erreurEl = document.getElementById('erreur-connexion');
+  erreurEl.textContent = '';
+  const ok = await tenterConnexion(pwd);
+  if (ok) {
+    motDePasse = pwd;
+    sessionStorage.setItem('sp_dashboard_pwd', pwd);
+    afficherDashboard();
+  } else {
+    erreurEl.textContent = 'Mot de passe incorrect.';
+  }
+});
+
+document.getElementById('champ-mot-de-passe').addEventListener('keydown', (e) => {
+  if (e.key === 'Enter') document.getElementById('btn-connexion').click();
+});
+
+document.getElementById('btn-deconnexion').addEventListener('click', () => {
+  sessionStorage.removeItem('sp_dashboard_pwd');
+  motDePasse = '';
+  document.getElementById('dashboard').style.display = 'none';
+  document.getElementById('ecran-connexion').style.display = 'flex';
+});
+
+async function afficherDashboard() {
+  document.getElementById('ecran-connexion').style.display = 'none';
+  document.getElementById('dashboard').style.display = 'block';
+  await chargerArticles();
+}
+
+(async function initialisation() {
+  if (motDePasse) {
+    const ok = await tenterConnexion(motDePasse);
+    if (ok) { afficherDashboard(); return; }
+    sessionStorage.removeItem('sp_dashboard_pwd');
+    motDePasse = '';
+  }
+})();
+
+async function chargerArticles() {
+  const res = await fetch(`${API}/articles`, { headers: { 'x-dashboard-password': motDePasse } });
+  if (!res.ok) { afficherToast('Impossible de charger le catalogue', true); return; }
+  const { articles } = await res.json();
+  afficherGrille(articles || []);
+}
+
+function afficherGrille(articles) {
+  const grille = document.getElementById('grille-articles');
+  const etatVide = document.getElementById('etat-vide');
+  grille.innerHTML = '';
+
+  if (articles.length === 0) { etatVide.style.display = 'block'; return; }
+  etatVide.style.display = 'none';
+
+  for (const a of articles) {
+    const carte = document.createElement('div');
+    carte.className = 'carte-article';
+    carte.innerHTML = `
+      <div class="photo" style="${a.photo_url ? `background-image:url('${a.photo_url}')` : ''}">
+        ${a.photo_url ? '' : 'Pas de photo'}
+      </div>
+      <div class="infos">
+        <div class="nom">${escapeHtml(a.nom)}${a.actif ? '' : '<span class="badge-inactif">inactif</span>'}</div>
+        <div class="meta"><span>${escapeHtml(a.type || '')}</span><span>${formatPrix(a.prix)} CFA</span></div>
+      </div>
+    `;
+    carte.addEventListener('click', () => ouvrirFormulaire(a));
+    grille.appendChild(carte);
+  }
+}
+
+function escapeHtml(s) {
+  const div = document.createElement('div');
+  div.textContent = s || '';
+  return div.innerHTML;
+}
+function formatPrix(p) { return new Intl.NumberFormat('fr-FR').format(p || 0); }
+
+document.getElementById('btn-nouvel-article').addEventListener('click', () => ouvrirFormulaire(null));
+document.getElementById('btn-annuler-formulaire').addEventListener('click', fermerFormulaire);
+
+function ouvrirFormulaire(article) {
+  articleEnEdition = article ? article.id : null;
+  photoBase64 = null;
+  photoFilename = null;
+  photoMimeType = null;
+  photoUrlExistante = article ? article.photo_url : null;
+
+  document.getElementById('titre-formulaire').textContent = article ? "Modifier l'article" : 'Nouvel article';
+  document.getElementById('champ-nom').value = article ? article.nom : '';
+  document.getElementById('champ-categorie').value = article ? article.categorie : 'homme';
+  document.getElementById('champ-type').value = article ? article.type : '';
+  document.getElementById('champ-occasion').value = article ? (article.tags_occasion || '') : '';
+  document.getElementById('champ-couleur').value = article ? article.couleur : '';
+  document.getElementById('champ-prix').value = article ? article.prix : '';
+  document.getElementById('champ-qualite').value = article ? (article.qualite || '') : '';
+  document.getElementById('champ-description').value = article ? article.description : '';
+  document.getElementById('champ-actif').checked = article ? !!article.actif : true;
+
+  const apercu = document.getElementById('apercu-photo');
+  const instruction = document.getElementById('instruction-photo');
+  if (photoUrlExistante) {
+    apercu.innerHTML = `<img src="${photoUrlExistante}">`;
+    instruction.textContent = 'Glissez une nouvelle photo pour la remplacer';
+  } else {
+    apercu.innerHTML = '';
+    instruction.textContent = 'Glissez une photo ici, ou cliquez pour en choisir une';
+  }
+
+  const liste = document.getElementById('liste-pointures');
+  liste.innerHTML = '';
+  const stockParPointure = article && article.stock_par_pointure ? article.stock_par_pointure : {};
+  const entrees = Object.entries(stockParPointure);
+  if (entrees.length === 0) { ajouterLignePointure(); }
+  else { for (const [pointure, stock] of entrees) { ajouterLignePointure(pointure, stock); } }
+
+  mettreAJourVisibiliteOccasion();
+  document.getElementById('panneau-overlay').style.display = 'block';
+}
+
+function fermerFormulaire() { document.getElementById('panneau-overlay').style.display = 'none'; }
+
+document.getElementById('champ-categorie').addEventListener('change', mettreAJourVisibiliteOccasion);
+function mettreAJourVisibiliteOccasion() {
+  const cat = document.getElementById('champ-categorie').value;
+  const conteneur = document.getElementById('champ-occasion-conteneur');
+  conteneur.style.display = (cat === 'homme' || cat === 'femme') ? 'block' : 'none';
+  if (conteneur.style.display === 'none') { document.getElementById('champ-occasion').value = ''; }
+}
+
+document.getElementById('btn-ajouter-pointure').addEventListener('click', () => ajouterLignePointure());
+
+function ajouterLignePointure(pointure, stock) {
+  const liste = document.getElementById('liste-pointures');
+  const ligne = document.createElement('div');
+  ligne.className = 'ligne-pointure';
+  ligne.innerHTML = `
+    <input type="text" placeholder="Pointure (ex: 39)" class="champ-pointure-valeur" value="${pointure || ''}">
+    <input type="number" placeholder="Stock" min="0" class="champ-pointure-stock" value="${stock !== undefined ? stock : ''}">
+    <button type="button" class="retirer">×</button>
+  `;
+  ligne.querySelector('.retirer').addEventListener('click', () => ligne.remove());
+  liste.appendChild(ligne);
+}
+
+const zonePhoto = document.getElementById('zone-photo');
+const champPhoto = document.getElementById('champ-photo');
+
+zonePhoto.addEventListener('click', () => champPhoto.click());
+champPhoto.addEventListener('change', (e) => { if (e.target.files[0]) traiterFichierPhoto(e.target.files[0]); });
+zonePhoto.addEventListener('dragover', (e) => { e.preventDefault(); zonePhoto.classList.add('survol'); });
+zonePhoto.addEventListener('dragleave', () => zonePhoto.classList.remove('survol'));
+zonePhoto.addEventListener('drop', (e) => {
+  e.preventDefault();
+  zonePhoto.classList.remove('survol');
+  if (e.dataTransfer.files[0]) traiterFichierPhoto(e.dataTransfer.files[0]);
+});
+
+function traiterFichierPhoto(fichier) {
+  if (!fichier.type.startsWith('image/')) { afficherToast('Merci de déposer une image', true); return; }
+  photoFilename = fichier.name;
+  photoMimeType = fichier.type;
+  const reader = new FileReader();
+  reader.onload = (e) => {
+    const resultat = e.target.result;
+    photoBase64 = resultat.split(',')[1];
+    document.getElementById('apercu-photo').innerHTML = `<img src="${resultat}">`;
+    document.getElementById('instruction-photo').textContent = fichier.name;
+  };
+  reader.readAsDataURL(fichier);
+}
+
+document.getElementById('form-article').addEventListener('submit', async (e) => {
+  e.preventDefault();
+  const btn = document.getElementById('btn-enregistrer');
+  btn.disabled = true;
+  btn.textContent = 'Enregistrement...';
+
+  try {
+    let photoUrlFinale = photoUrlExistante;
+
+    if (photoBase64) {
+      const resUpload = await fetch(`${API}/upload`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', 'x-dashboard-password': motDePasse },
+        body: JSON.stringify({ filename: photoFilename, base64Data: photoBase64, mimeType: photoMimeType })
+      });
+      if (!resUpload.ok) {
+        const err = await resUpload.json();
+        throw new Error(err.error || "Échec de l'upload de la photo");
+      }
+      const { photo_url } = await resUpload.json();
+      photoUrlFinale = photo_url;
+    }
+
+    const stockParPointure = {};
+    document.querySelectorAll('#liste-pointures .ligne-pointure').forEach(ligne => {
+      const pointure = ligne.querySelector('.champ-pointure-valeur').value.trim();
+      const stock = ligne.querySelector('.champ-pointure-stock').value;
+      if (pointure) stockParPointure[pointure] = parseInt(stock, 10) || 0;
+    });
+
+    const corps = {
+      nom: document.getElementById('champ-nom').value,
+      categorie: document.getElementById('champ-categorie').value,
+      type: document.getElementById('champ-type').value,
+      occasion: document.getElementById('champ-occasion').value,
+      couleur: document.getElementById('champ-couleur').value,
+      prix: document.getElementById('champ-prix').value,
+      qualite: document.getElementById('champ-qualite').value,
+      description: document.getElementById('champ-description').value,
+      actif: document.getElementById('champ-actif').checked,
+      photo_url: photoUrlFinale,
+      stock_par_pointure: stockParPointure
+    };
+
+    const url = articleEnEdition ? `${API}/articles?id=${articleEnEdition}` : `${API}/articles`;
+    const methode = articleEnEdition ? 'PUT' : 'POST';
+
+    const res = await fetch(url, {
+      method: methode,
+      headers: { 'Content-Type': 'application/json', 'x-dashboard-password': motDePasse },
+      body: JSON.stringify(corps)
+    });
+
+    if (!res.ok) {
+      const err = await res.json();
+      throw new Error(err.error || "Échec de l'enregistrement");
+    }
+
+    afficherToast(articleEnEdition ? 'Article modifié' : 'Article ajouté');
+    fermerFormulaire();
+    await chargerArticles();
+  } catch (err) {
+    afficherToast(err.message, true);
+  } finally {
+    btn.disabled = false;
+    btn.textContent = 'Enregistrer';
+  }
+});
+
+let toastTimeout;
+function afficherToast(message, estErreur) {
+  const toast = document.getElementById('toast');
+  toast.textContent = message;
+  toast.className = 'toast' + (estErreur ? ' erreur' : '');
+  toast.style.display = 'block';
+  clearTimeout(toastTimeout);
+  toastTimeout = setTimeout(() => { toast.style.display = 'none'; }, 3500);
+}
+</script>
+
+</body>
+</html>
