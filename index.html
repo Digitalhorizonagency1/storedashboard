@@ -79,6 +79,61 @@
 
   main { padding: 24px 28px 80px; max-width: 1100px; margin: 0 auto; }
 
+  /* ---------- Onglets ---------- */
+  .onglets {
+    display: flex; gap: 4px; padding: 0 28px;
+    border-bottom: 1px solid var(--bordure);
+    max-width: 1100px; margin: 0 auto;
+  }
+  .onglet {
+    background: transparent; border: none; color: var(--texte-att);
+    padding: 12px 16px; font-size: 14px; font-weight: 600; cursor: pointer;
+    border-bottom: 2px solid transparent; margin-bottom: -1px;
+  }
+  .onglet.actif { color: var(--or); border-bottom-color: var(--or); }
+  .onglet:hover { color: var(--texte); }
+
+  .barre-vue { display: flex; justify-content: flex-end; align-items: center; margin-top: 4px; }
+
+  /* ---------- Vue commandes ---------- */
+  .cartes-resume { display: grid; grid-template-columns: repeat(auto-fit, minmax(160px, 1fr)); gap: 12px; margin: 20px 0; }
+  .carte-resume {
+    background: var(--noir-clair); border: 1px solid var(--bordure); border-radius: 10px; padding: 16px;
+  }
+  .carte-resume .valeur { font-size: 22px; font-weight: 700; color: var(--or); }
+  .carte-resume .label { font-size: 12px; color: var(--texte-att); margin-top: 4px; }
+
+  .ligne-commande {
+    background: var(--noir-clair); border: 1px solid var(--bordure); border-radius: 10px;
+    padding: 14px 16px; margin-bottom: 10px; display: grid;
+    grid-template-columns: 48px 1fr auto; gap: 14px; align-items: center;
+  }
+  .ligne-commande .miniature {
+    width: 48px; height: 48px; border-radius: 8px; background: #0c0a08 center/cover no-repeat;
+  }
+  .ligne-commande .details .nom-article { font-weight: 600; font-size: 14px; }
+  .ligne-commande .details .sous-info { font-size: 12px; color: var(--texte-att); margin-top: 2px; }
+  .ligne-commande .droite { text-align: right; display: flex; flex-direction: column; align-items: flex-end; gap: 6px; }
+  .ligne-commande .prix { font-weight: 700; font-size: 15px; }
+  select.select-statut {
+    background: var(--noir); border: 1px solid var(--bordure); color: var(--texte);
+    border-radius: 6px; padding: 6px 10px; font-size: 12px; cursor: pointer;
+  }
+  .badge-statut {
+    display: inline-block; font-size: 10px; padding: 3px 8px; border-radius: 10px;
+    text-transform: uppercase; letter-spacing: 0.03em;
+  }
+  .badge-statut.en_attente_confirmation { background: #4a3f2a; color: var(--or-clair); }
+  .badge-statut.confirmee { background: #2a4a3f; color: var(--succes); }
+  .badge-statut.expediee { background: #2a3a4a; color: #7aa0c9; }
+  .badge-statut.livree { background: #1e3a1e; color: #8fc98f; }
+  .badge-statut.annulee { background: #4a2a2a; color: var(--erreur); }
+
+  @media (max-width: 480px) {
+    .ligne-commande { grid-template-columns: 40px 1fr; }
+    .ligne-commande .droite { grid-column: 1 / -1; flex-direction: row; justify-content: space-between; align-items: center; margin-top: 8px; }
+  }
+
   .grille-articles { display: grid; grid-template-columns: repeat(auto-fill, minmax(220px, 1fr)); gap: 16px; margin-top: 20px; }
   .carte-article {
     background: var(--noir-clair); border: 1px solid var(--bordure); border-radius: 10px;
@@ -154,14 +209,31 @@
   <header class="entete">
     <h1 id="titre-boutique-entete">Catalogue</h1>
     <div class="actions-entete">
-      <button class="btn-petit" id="btn-nouvel-article">+ Ajouter un article</button>
       <button class="btn-petit secondaire" id="btn-deconnexion">Déconnexion</button>
     </div>
   </header>
+  <nav class="onglets">
+    <button class="onglet actif" data-vue="catalogue">Catalogue</button>
+    <button class="onglet" data-vue="commandes">Commandes</button>
+  </nav>
   <main>
-    <div id="grille-articles" class="grille-articles"></div>
-    <div id="etat-vide" class="etat-vide" style="display:none;">
-      Aucun article pour l'instant. Cliquez sur "Ajouter un article" pour commencer.
+    <div id="vue-catalogue">
+      <div class="barre-vue">
+        <div></div>
+        <button class="btn-petit" id="btn-nouvel-article">+ Ajouter un article</button>
+      </div>
+      <div id="grille-articles" class="grille-articles"></div>
+      <div id="etat-vide" class="etat-vide" style="display:none;">
+        Aucun article pour l'instant. Cliquez sur "Ajouter un article" pour commencer.
+      </div>
+    </div>
+
+    <div id="vue-commandes" style="display:none;">
+      <div class="cartes-resume" id="cartes-resume-commandes"></div>
+      <div id="liste-commandes"></div>
+      <div id="etat-vide-commandes" class="etat-vide" style="display:none;">
+        Aucune commande pour l'instant.
+      </div>
     </div>
   </main>
 </div>
@@ -318,6 +390,101 @@ async function afficherDashboard() {
   document.getElementById('ecran-connexion').style.display = 'none';
   document.getElementById('dashboard').style.display = 'block';
   await chargerArticles();
+}
+
+// ---------- Onglets ----------
+document.querySelectorAll('.onglet').forEach(btn => {
+  btn.addEventListener('click', () => {
+    document.querySelectorAll('.onglet').forEach(b => b.classList.remove('actif'));
+    btn.classList.add('actif');
+    const vue = btn.dataset.vue;
+    document.getElementById('vue-catalogue').style.display = vue === 'catalogue' ? 'block' : 'none';
+    document.getElementById('vue-commandes').style.display = vue === 'commandes' ? 'block' : 'none';
+    if (vue === 'commandes') chargerCommandes();
+  });
+});
+
+const LIBELLES_STATUT = {
+  en_attente_confirmation: 'En attente',
+  confirmee: 'Confirmée',
+  expediee: 'Expédiée',
+  livree: 'Livrée',
+  annulee: 'Annulée'
+};
+
+async function chargerCommandes() {
+  const res = await fetch(`${API}/orders`, { headers: { 'x-dashboard-password': motDePasse } });
+  if (!res.ok) { afficherToast('Impossible de charger les commandes', true); return; }
+  const { commandes } = await res.json();
+  afficherResumeCommandes(commandes || []);
+  afficherListeCommandes(commandes || []);
+}
+
+function afficherResumeCommandes(commandes) {
+  const total = commandes.length;
+  const enAttente = commandes.filter(c => c.statut === 'en_attente_confirmation').length;
+  const caLivre = commandes
+    .filter(c => c.statut === 'livree')
+    .reduce((sum, c) => sum + (parseFloat(c.prix_total) || 0), 0);
+
+  document.getElementById('cartes-resume-commandes').innerHTML = `
+    <div class="carte-resume"><div class="valeur">${total}</div><div class="label">Commandes au total</div></div>
+    <div class="carte-resume"><div class="valeur">${enAttente}</div><div class="label">En attente de confirmation</div></div>
+    <div class="carte-resume"><div class="valeur">${formatPrix(caLivre)} CFA</div><div class="label">Chiffre d'affaires livré</div></div>
+  `;
+}
+
+function afficherListeCommandes(commandes) {
+  const conteneur = document.getElementById('liste-commandes');
+  const etatVide = document.getElementById('etat-vide-commandes');
+  conteneur.innerHTML = '';
+
+  if (commandes.length === 0) { etatVide.style.display = 'block'; return; }
+  etatVide.style.display = 'none';
+
+  for (const c of commandes) {
+    const ligne = document.createElement('div');
+    ligne.className = 'ligne-commande';
+    const statutActuel = c.statut || 'en_attente_confirmation';
+    ligne.innerHTML = `
+      <div class="miniature" style="${c.article_photo ? `background-image:url('${c.article_photo}')` : ''}"></div>
+      <div class="details">
+        <div class="nom-article">${escapeHtml(c.article_nom)} — pointure ${escapeHtml(c.pointure || '?')} × ${c.quantite || 1}</div>
+        <div class="sous-info">${escapeHtml(c.nom_client || 'Client inconnu')} · ${escapeHtml(c.adresse_livraison || '')}</div>
+        <div class="sous-info">${formatDate(c.created_at)}</div>
+      </div>
+      <div class="droite">
+        <div class="prix">${formatPrix(c.prix_total)} CFA</div>
+        <select class="select-statut" data-id="${c.id}">
+          ${Object.entries(LIBELLES_STATUT).map(([val, label]) =>
+            `<option value="${val}" ${val === statutActuel ? 'selected' : ''}>${label}</option>`
+          ).join('')}
+        </select>
+      </div>
+    `;
+    ligne.querySelector('.select-statut').addEventListener('change', async (e) => {
+      const nouveauStatut = e.target.value;
+      const id = e.target.dataset.id;
+      const res = await fetch(`${API}/orders?id=${id}`, {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json', 'x-dashboard-password': motDePasse },
+        body: JSON.stringify({ statut: nouveauStatut })
+      });
+      if (res.ok) {
+        afficherToast('Statut mis à jour');
+        chargerCommandes();
+      } else {
+        afficherToast('Échec de la mise à jour du statut', true);
+      }
+    });
+    conteneur.appendChild(ligne);
+  }
+}
+
+function formatDate(iso) {
+  if (!iso) return '';
+  const d = new Date(iso);
+  return d.toLocaleDateString('fr-FR', { day: '2-digit', month: 'short', year: 'numeric', hour: '2-digit', minute: '2-digit' });
 }
 
 (async function initialisation() {
