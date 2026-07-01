@@ -272,6 +272,32 @@
   }
   .toast.erreur { border-color: var(--erreur); }
 
+  /* ---------- Modale de confirmation ---------- */
+  .modal-confirm-overlay {
+    display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.65);
+    z-index: 300; align-items: center; justify-content: center; padding: 20px;
+  }
+  .modal-confirm-overlay.visible { display: flex; }
+  .modal-confirm {
+    background: var(--noir-carte); border: 1px solid var(--bordure); border-radius: 16px;
+    padding: 32px 28px; max-width: 340px; width: 100%; text-align: center;
+    box-shadow: 0 24px 60px rgba(0,0,0,0.5);
+    animation: modalPop 0.18s ease;
+  }
+  @keyframes modalPop { from { transform: scale(0.92); opacity: 0; } to { transform: scale(1); opacity: 1; } }
+  .modal-confirm-icone {
+    width: 48px; height: 48px; border-radius: 50%; background: rgba(208,101,74,0.12);
+    color: var(--erreur); font-size: 22px; font-weight: 700; display: flex; align-items: center; justify-content: center;
+    margin: 0 auto 16px;
+  }
+  .modal-confirm p { font-size: 14.5px; line-height: 1.5; color: var(--texte); margin-bottom: 24px; }
+  .modal-confirm-actions { display: flex; gap: 10px; }
+  .modal-confirm-actions .btn { margin-top: 0; width: auto; flex: 1; }
+  .btn.danger-plein {
+    background: var(--erreur); color: white; box-shadow: 0 4px 14px rgba(208,101,74,0.3);
+  }
+  .btn.danger-plein:hover { background: #c85a3f; transform: translateY(-1px); }
+
   @media (max-width: 480px) {
     .ligne-2 { grid-template-columns: 1fr; }
     main { padding: 16px 16px 60px; }
@@ -453,6 +479,17 @@
         </div>
       </div>
     </form>
+  </div>
+</div>
+
+<div id="modal-confirmation-overlay" class="modal-confirm-overlay">
+  <div class="modal-confirm">
+    <div class="modal-confirm-icone">!</div>
+    <p id="modal-confirm-message">Confirmer cette action ?</p>
+    <div class="modal-confirm-actions">
+      <button type="button" class="btn secondaire" id="modal-confirm-annuler">Annuler</button>
+      <button type="button" class="btn danger-plein" id="modal-confirm-valider">Supprimer</button>
+    </div>
   </div>
 </div>
 
@@ -682,8 +719,34 @@ function capitaliser(s) {
   return s.charAt(0).toUpperCase() + s.slice(1);
 }
 
+function confirmerAction(message) {
+  return new Promise((resolve) => {
+    const overlay = document.getElementById('modal-confirmation-overlay');
+    document.getElementById('modal-confirm-message').textContent = message;
+    overlay.classList.add('visible');
+
+    const btnValider = document.getElementById('modal-confirm-valider');
+    const btnAnnuler = document.getElementById('modal-confirm-annuler');
+
+    function nettoyer(resultat) {
+      overlay.classList.remove('visible');
+      btnValider.removeEventListener('click', onValider);
+      btnAnnuler.removeEventListener('click', onAnnuler);
+      overlay.removeEventListener('click', onFondClique);
+      resolve(resultat);
+    }
+    function onValider() { nettoyer(true); }
+    function onAnnuler() { nettoyer(false); }
+    function onFondClique(e) { if (e.target === overlay) nettoyer(false); }
+
+    btnValider.addEventListener('click', onValider);
+    btnAnnuler.addEventListener('click', onAnnuler);
+    overlay.addEventListener('click', onFondClique);
+  });
+}
+
 async function supprimerDepuisTuile(id, carte) {
-  const confirme = confirm('Supprimer définitivement cet article ?');
+  const confirme = await confirmerAction('Supprimer définitivement cet article ?');
   if (!confirme) return;
 
   carte.classList.add('suppression-en-cours');
@@ -770,7 +833,7 @@ function fermerFormulaire() { document.getElementById('panneau-overlay').style.d
 
 document.getElementById('btn-supprimer-article').addEventListener('click', async () => {
   if (!articleEnEdition) return;
-  const confirme = confirm('Supprimer définitivement cet article ? Cette action est irréversible.');
+  const confirme = await confirmerAction('Supprimer définitivement cet article ? Cette action est irréversible.');
   if (!confirme) return;
 
   const res = await fetch(`${API}/articles?id=${articleEnEdition}`, {
